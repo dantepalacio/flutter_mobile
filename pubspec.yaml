@@ -38,6 +38,9 @@ dependencies:
   cupertino_icons: ^1.0.2
   http: ^0.13.5
   form_field_validator: ^1.1.0
+  flutter_secure_storage: ^8.0.0
+  path_provider: ^2.0.12
+  sqflite: ^2.2.4+1
 
 dev_dependencies:
   flutter_test:

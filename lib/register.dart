@@ -1,15 +1,65 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'HomePage.dart';
 import 'login.dart';
 import 'package:form_field_validator/form_field_validator.dart';
+import 'dart:convert';
 
 class RegisterPage extends StatefulWidget {
   @override
   _RegisterPageState createState() => _RegisterPageState();
 }
 
+// void main(List<String> args) async {
+//   AuthService authService = AuthService();
+//   var responseBody = await authService.registration(
+//       'anuar_test', 'test@mail.ru', 'anuar123', 'anuar123');
+//   print(responseBody);
+// }
+
+// class AuthService {
+//   final registrationUri = Uri.parse('http://192.168.0.8:8000/api/register/');
+
+//   Future<String> registration(
+//       String username, String email, String password1, String password2) async {
+//     var response = await http.post(registrationUri, body: {
+//       'username': username,
+//       'email': email,
+//       'password1': password1,
+//       'password2': password2,
+//     });
+//     return response.body;
+//   }
+// }
+
+class UserData {
+  String username;
+  String email;
+  String password1;
+  String password2;
+
+
+  UserData(
+      {required this.username,
+      required this.email,
+      required this.password1,
+      required this.password2});
+
+  Map<String, dynamic> toJson() => {
+        'username': username,
+        'email': email,
+        'password1': password1,
+        'password2': password2,
+      };
+}
+
 class _RegisterPageState extends State<RegisterPage> {
   @override
+  TextEditingController usernameController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  TextEditingController password2Controller = TextEditingController();
+
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
@@ -23,6 +73,7 @@ class _RegisterPageState extends State<RegisterPage> {
               padding: EdgeInsets.symmetric(horizontal: 15),
               margin: const EdgeInsets.only(top: 50.0),
               child: TextField(
+                controller: usernameController,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Придумайте имя',
@@ -34,6 +85,7 @@ class _RegisterPageState extends State<RegisterPage> {
               padding: EdgeInsets.symmetric(horizontal: 15),
               margin: const EdgeInsets.only(top: 15.0),
               child: TextFormField(
+                  controller: emailController,
                   decoration: InputDecoration(
                       border: OutlineInputBorder(),
                       labelText: 'Введите почту',
@@ -49,6 +101,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   left: 15.0, right: 15.0, top: 15, bottom: 0),
               //padding: EdgeInsets.symmetric(horizontal: 15),
               child: TextFormField(
+                controller: passwordController,
                 obscureText: true,
                 decoration: InputDecoration(
                     border: OutlineInputBorder(),
@@ -69,6 +122,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   left: 15.0, right: 15.0, top: 15, bottom: 0),
               //padding: EdgeInsets.symmetric(horizontal: 15),
               child: TextFormField(
+                controller: password2Controller,
                 obscureText: true,
                 decoration: InputDecoration(
                     border: OutlineInputBorder(),
@@ -91,7 +145,26 @@ class _RegisterPageState extends State<RegisterPage> {
               decoration: BoxDecoration(
                   color: Colors.blue, borderRadius: BorderRadius.circular(20)),
               child: TextButton(
-                onPressed: () {
+                onPressed: () async {
+                  UserData userData = UserData(
+                    username: usernameController.text,
+                    email: emailController.text,
+                    password1: passwordController.text,
+                    password2: password2Controller.text,
+                  );
+                  String jsonBody = json.encode(userData);
+
+                  final response = await http.post(
+                    Uri.parse('http://192.168.0.8:8000/api/register/'),
+                    headers: <String, String>{
+                      'Content-Type': 'application/json; charset=UTF-8',
+                    },
+                    body: jsonBody,
+                  );
+
+                  if (response.statusCode == 200) {
+                  } else {}
+
                   Navigator.push(
                       context, MaterialPageRoute(builder: (_) => LoginDemo()));
                 },

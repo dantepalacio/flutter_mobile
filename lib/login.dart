@@ -5,6 +5,9 @@ import 'package:last/reset_password.dart';
 import 'HomePage.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'dart:convert';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+import 'package:last/repository/user_repository.dart';
 
 void main() {
   runApp(MyApp());
@@ -20,6 +23,16 @@ class UserData {
         'username': username,
         'password': password,
       };
+}
+
+class Token {
+  String token;
+
+  Token({required this.token});
+
+  factory Token.fromJson(Map<String, dynamic> json) {
+    return Token(token: json['token']);
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -121,8 +134,12 @@ class _LoginDemoState extends State<LoginDemo> {
             ),
             TextButton(
               onPressed: () {
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (_) => ResetPage()));
+                UserRepository userRepository = UserRepository();
+                userRepository.signInWithCredentials(
+                    username: usernameController.text,
+                    password: passwordController.text);
+                // Navigator.push(
+                //     context, MaterialPageRoute(builder: (_) => ResetPage()));
               },
               child: Text(
                 'Забыли пароль?',
@@ -143,16 +160,17 @@ class _LoginDemoState extends State<LoginDemo> {
                   String jsonBody = json.encode(userData);
 
                   final response = await http.post(
-                    Uri.parse('http://127.0.0.1:8000/api/login'),
+                    Uri.parse('http://192.168.0.8:8000/token/'),
                     headers: <String, String>{
+                      'Authorization':
+                          'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjc2ODc4NjgyLCJpYXQiOjE2NzY4NzgzODIsImp0aSI6IjA5YzI5ZmNjY2FjMzQwMjE5NzcxZWY3ZWY4ZjQ3NjBkIiwidXNlcl9pZCI6MTV9.uZ9yYGeRJ6nAYhkdOHBBGwmBU9fQTEYIH7B9WjIULXc',
                       'Content-Type': 'application/json; charset=UTF-8',
                     },
                     body: jsonBody,
                   );
 
                   if (response.statusCode == 200) {
-                  } else {
-                  }
+                  } else {}
 
                   Navigator.push(
                       context, MaterialPageRoute(builder: (_) => HomePage()));
