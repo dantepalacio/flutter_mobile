@@ -1,13 +1,20 @@
 import 'dart:async';
+import 'dart:convert';
+// import 'package:flutter_session/flutter_session.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:meta/meta.dart';
+import 'package:http/http.dart' as http;
 
 import 'package:last/dao/dao.dart';
 import 'package:last/models/user_model.dart';
 import 'package:last/models/api_models.dart';
 import 'package:last/api_connection/api_connection.dart';
+import 'package:last/repository/user_interface.dart';
 
-class UserRepository {
+class UserRepository implements IUserRepository {
   final userDao = UserDao();
+
+  UserRepository();
 
   Future<User> signInWithCredentials({
     required String username,
@@ -64,26 +71,83 @@ class UserRepository {
   //   await userDao.createUser(user);
   // }
 
-  // Future<void> deleteToken({@required int id}) async {
-  //   await userDao.deleteUser(id);
-  // }
+  Future<void> deleteToken({required int id}) async {
+    await userDao.deleteUser(id);
+  }
 
-  // Future<void> signOut() async {
-  //   print("Logging out");
-  //   await deleteToken(id: 0);
-  // }
+  Future<void> signOut() async {
+    print("Logging out");
+    await deleteToken(id: 0);
+  }
 
-  // Future<bool> hasToken() async {
-  //   bool result = await userDao.checkUser(0);
-  //   return result;
-  // }
+  Future<bool> hasToken() async {
+    bool result = await userDao.checkUser(0);
+    return result;
+  }
 
-  // Future<bool> isSignedIn() async {
-  //   return hasToken();
-  // }
+  Future<bool> isSignedIn() async {
+    return hasToken();
+  }
 
   Future<String> getUser() async {
-    User user = await userDao.getUserById(0);
-    return user.username;
+    User? user = await userDao.getUserById(0);
+    return user!.username;
+  }
+
+  @override
+  Future<void> delete(int id) {
+    // TODO: implement delete
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<List<User>> getAll() {
+    // TODO: implement getAll
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<User?> getOne(int id) {
+    // TODO: implement getOne
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool> register(String email, String username, String password) async {
+    // TODO: implement insert
+    UserRegister userRegister =
+        UserRegister(email: email, username: username, password: password);
+    Future<bool> success = registerApi(userRegister);
+
+    return success;
+  }
+
+  @override
+  Future<String> login(String username, String password) async {
+    // TODO: implement insert
+
+    UserLogin userLogin = UserLogin(username: username, password: password);
+    int userID = await loginApi(userLogin);
+    final http.Response response = await http.post(
+      Uri.parse('http://192.168.0.8:8000/token/'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(userLogin.toDatabaseJson()),
+    );
+    Token token = Token.fromJson(json.decode(response.body));
+    if (userID != 0) {
+      // await FlutterSession().set('token', username);
+    }
+
+    return token.token;
+  }
+
+
+
+  @override
+  Future<void> update(User user) {
+    // TODO: implement update
+    throw UnimplementedError();
   }
 }

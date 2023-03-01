@@ -14,7 +14,7 @@ class _ResetPageState extends State<ResetPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text("Сброс пароля"),
+        title: const Text("Сброс пароля"),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -22,7 +22,7 @@ class _ResetPageState extends State<ResetPage> {
             Container(
               padding: EdgeInsets.symmetric(horizontal: 15),
               margin: const EdgeInsets.only(top: 20.0),
-              child: Text(
+              child: const Text(
                 'Для сброса пароля необходимо ввести зарегистрированный email, на который вышлется письмо о сбросе',
                 style: TextStyle(color: Colors.blue, fontSize: 20),
               ),
@@ -31,7 +31,7 @@ class _ResetPageState extends State<ResetPage> {
               padding: EdgeInsets.symmetric(horizontal: 15),
               margin: const EdgeInsets.only(top: 15.0),
               child: TextFormField(
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                       labelText: 'Введите почту',
                       hintText:
@@ -50,9 +50,9 @@ class _ResetPageState extends State<ResetPage> {
               child: TextButton(
                 onPressed: () {
                   Navigator.push(
-                      context, MaterialPageRoute(builder: (_) => HomePage()));
+                      context, MaterialPageRoute(builder: (_) => HomePage(name: '', sessionId: '',)));
                 },
-                child: Text(
+                child: const Text(
                   'Сбросить',
                   style: TextStyle(color: Colors.white, fontSize: 20),
                 ),

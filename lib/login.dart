@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:last/controllers/home_controller.dart';
+import 'package:last/models/api_models.dart';
 import 'package:last/register.dart';
 import 'package:last/reset_password.dart';
 import 'HomePage.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
+import 'package:last/api_connection/api_connection.dart';
 import 'package:last/repository/user_repository.dart';
 
 void main() {
@@ -48,6 +50,8 @@ class MyApp extends StatelessWidget {
 class LoginDemo extends StatefulWidget {
   @override
   _LoginDemoState createState() => _LoginDemoState();
+
+  final HomeController _homeController = HomeController();
 }
 
 class _LoginDemoState extends State<LoginDemo> {
@@ -138,10 +142,10 @@ class _LoginDemoState extends State<LoginDemo> {
                 userRepository.signInWithCredentials(
                     username: usernameController.text,
                     password: passwordController.text);
-                // Navigator.push(
-                //     context, MaterialPageRoute(builder: (_) => ResetPage()));
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (_) => ResetPage()));
               },
-              child: Text(
+              child: const Text(
                 'Забыли пароль?',
                 style: TextStyle(color: Colors.blue, fontSize: 15),
               ),
@@ -153,27 +157,40 @@ class _LoginDemoState extends State<LoginDemo> {
                   color: Colors.blue, borderRadius: BorderRadius.circular(20)),
               child: TextButton(
                 onPressed: () async {
-                  UserData userData = UserData(
-                    username: usernameController.text,
-                    password: passwordController.text,
-                  );
-                  String jsonBody = json.encode(userData);
+                  String username = usernameController.text;
+                  String password = passwordController.text;
+                  String userCreds = await widget._homeController
+                      .loginUser(username, password);
 
-                  final response = await http.post(
-                    Uri.parse('http://192.168.0.8:8000/token/'),
-                    headers: <String, String>{
-                      'Authorization':
-                          'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjc2ODc4NjgyLCJpYXQiOjE2NzY4NzgzODIsImp0aSI6IjA5YzI5ZmNjY2FjMzQwMjE5NzcxZWY3ZWY4ZjQ3NjBkIiwidXNlcl9pZCI6MTV9.uZ9yYGeRJ6nAYhkdOHBBGwmBU9fQTEYIH7B9WjIULXc',
-                      'Content-Type': 'application/json; charset=UTF-8',
-                    },
-                    body: jsonBody,
-                  );
+                  UserLogin userLogin =
+                      UserLogin(username: username, password: password);
+                  print('TOKEN LOGIN ${getToken(userLogin)}');
+                  // UserData userData = UserData(
+                  //   username: usernameController.text,
+                  //   password: passwordController.text,
+                  // );
+                  // String jsonBody = json.encode(userData);
 
-                  if (response.statusCode == 200) {
-                  } else {}
+                  // final response = await http.post(
+                  //   Uri.parse('http://192.168.0.8:8000/token/'),
+                  //   headers: <String, String>{
+                  //     'Authorization':
+                  //         'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjc2ODc4NjgyLCJpYXQiOjE2NzY4NzgzODIsImp0aSI6IjA5YzI5ZmNjY2FjMzQwMjE5NzcxZWY3ZWY4ZjQ3NjBkIiwidXNlcl9pZCI6MTV9.uZ9yYGeRJ6nAYhkdOHBBGwmBU9fQTEYIH7B9WjIULXc',
+                  //     'Content-Type': 'application/json; charset=UTF-8',
+                  //   },
+                  //   body: jsonBody,
+                  // );
+
+                  // if (response.statusCode == 200) {
+                  // } else {}
 
                   Navigator.push(
-                      context, MaterialPageRoute(builder: (_) => HomePage()));
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => HomePage(
+                                name: userCreds, //usernameController.text
+                                sessionId: '',
+                              )));
                 },
                 child: Text(
                   'Вход',

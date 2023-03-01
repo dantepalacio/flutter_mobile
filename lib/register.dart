@@ -4,10 +4,14 @@ import 'HomePage.dart';
 import 'login.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'dart:convert';
+import 'package:last/repository/user_repository.dart';
+import 'package:last/controllers/home_controller.dart';
 
 class RegisterPage extends StatefulWidget {
   @override
   _RegisterPageState createState() => _RegisterPageState();
+
+  final HomeController _homeController = HomeController();
 }
 
 // void main(List<String> args) async {
@@ -38,7 +42,6 @@ class UserData {
   String password1;
   String password2;
 
-
   UserData(
       {required this.username,
       required this.email,
@@ -57,7 +60,7 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   TextEditingController usernameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
+  TextEditingController password1Controller = TextEditingController();
   TextEditingController password2Controller = TextEditingController();
 
   Widget build(BuildContext context) {
@@ -101,7 +104,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   left: 15.0, right: 15.0, top: 15, bottom: 0),
               //padding: EdgeInsets.symmetric(horizontal: 15),
               child: TextFormField(
-                controller: passwordController,
+                controller: password1Controller,
                 obscureText: true,
                 decoration: InputDecoration(
                     border: OutlineInputBorder(),
@@ -146,27 +149,35 @@ class _RegisterPageState extends State<RegisterPage> {
                   color: Colors.blue, borderRadius: BorderRadius.circular(20)),
               child: TextButton(
                 onPressed: () async {
-                  UserData userData = UserData(
-                    username: usernameController.text,
-                    email: emailController.text,
-                    password1: passwordController.text,
-                    password2: password2Controller.text,
-                  );
-                  String jsonBody = json.encode(userData);
+                  String username = usernameController.text;
+                  String email = emailController.text;
+                  String password = password1Controller.text;
+                  bool success = await widget._homeController
+                      .registerUser(email, username, password);
+                  // UserData userData = UserData(
+                  //   username: usernameController.text,
+                  //   email: emailController.text,
+                  //   password1: password1Controller.text,
+                  //   password2: password2Controller.text,
+                  // );
+                  // String jsonBody = json.encode(userData);
 
-                  final response = await http.post(
-                    Uri.parse('http://192.168.0.8:8000/api/register/'),
-                    headers: <String, String>{
-                      'Content-Type': 'application/json; charset=UTF-8',
-                    },
-                    body: jsonBody,
-                  );
-
-                  if (response.statusCode == 200) {
+                  // final response = await http.post(
+                  //   Uri.parse('http://192.168.0.8:8000/api/register/'),
+                  //   headers: <String, String>{
+                  //     'Content-Type': 'application/json; charset=UTF-8',
+                  //   },
+                  //   body: jsonEncode(<String, String>{
+                  //     'username': usernameController.text,
+                  //     'email': emailController.text,
+                  //     'password': password1Controller.text,
+                  //   }),
+                  // );
+// await Future.value(true)
+                  if (success == true) {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => LoginDemo()));
                   } else {}
-
-                  Navigator.push(
-                      context, MaterialPageRoute(builder: (_) => LoginDemo()));
                 },
                 child: Text(
                   'Зарегистрироваться',
