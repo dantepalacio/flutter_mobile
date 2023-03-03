@@ -48,14 +48,11 @@ class UserDao {
     }
   }
 
-  Future<String?> getUserToken(int id) async {
+  Future<List<Map>> getUserToken() async {
     final db = await dbProvider.database;
-    try {
-      var res = await db.rawQuery("SELECT token FROM userTable WHERE id=0");
-      return res.isNotEmpty ? (User.fromDatabaseJson(res.first)).token : null;
-    } catch (err) {
-      return null;
-    }
+      var res = await db.query("users");
+      return res;
+    
   }
 
   Future<int> createToken(
@@ -72,10 +69,10 @@ class UserDao {
 
   Future<List<Map<String, dynamic>>?> checkTokens() async {
     final db = await tokenDbProvider.database;
-    print('TOKEEEEEEEEEEEEEN ${db.query(TokenTable)}');
     return db.query(TokenTable);
   }
 
+  //добавляет наш токен в базу
   Future<int> addTokenToDb(String token, String refreshToken) async {
     final db = await tokenDbProvider.database;
 

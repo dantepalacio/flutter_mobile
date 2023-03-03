@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_session/flutter_session.dart';
 import 'package:http/http.dart' as http;
 import 'package:last/controllers/home_controller.dart';
 import 'package:last/models/api_models.dart';
@@ -6,8 +7,7 @@ import 'package:last/register.dart';
 import 'package:last/reset_password.dart';
 import 'HomePage.dart';
 import 'package:form_field_validator/form_field_validator.dart';
-import 'dart:convert';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+// import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:last/api_connection/api_connection.dart';
 import 'package:last/repository/user_repository.dart';
 
@@ -51,6 +51,7 @@ class LoginDemo extends StatefulWidget {
   @override
   _LoginDemoState createState() => _LoginDemoState();
 
+  // создаем объект контроллера
   final HomeController _homeController = HomeController();
 }
 
@@ -162,9 +163,15 @@ class _LoginDemoState extends State<LoginDemo> {
                   String userCreds = await widget._homeController
                       .loginUser(username, password);
 
-                  UserLogin userLogin =
-                      UserLogin(username: username, password: password);
-                  print('TOKEN LOGIN ${getToken(userLogin)}');
+                  String asd = await FlutterSession().get('token');
+                  int qwe = await FlutterSession().get('userID');
+
+                  print("UUUUUUDAAAAAAAA:      ${asd}");
+                  print("UUUUUUDAAAAAAAA:      ${qwe}");
+
+                  // UserLogin userLogin =
+                  //     UserLogin(username: username, password: password);
+                  // print('TOKEN LOGIN ${getToken(userLogin)}');
                   // UserData userData = UserData(
                   //   username: usernameController.text,
                   //   password: passwordController.text,
@@ -183,12 +190,12 @@ class _LoginDemoState extends State<LoginDemo> {
 
                   // if (response.statusCode == 200) {
                   // } else {}
-
+                  int vv = await FlutterSession().get('userID');
                   Navigator.push(
                       context,
                       MaterialPageRoute(
                           builder: (context) => HomePage(
-                                name: userCreds, //usernameController.text
+                                name: vv.toString(), //usernameController.text
                                 sessionId: '',
                               )));
                 },

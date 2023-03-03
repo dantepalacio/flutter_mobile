@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 // import 'package:flutter_session/flutter_session.dart';
+import 'package:flutter_session/flutter_session.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:meta/meta.dart';
 import 'package:http/http.dart' as http;
@@ -128,19 +129,14 @@ class UserRepository implements IUserRepository {
 
     UserLogin userLogin = UserLogin(username: username, password: password);
     int userID = await loginApi(userLogin);
-    final http.Response response = await http.post(
-      Uri.parse('http://192.168.0.8:8000/token/'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(userLogin.toDatabaseJson()),
-    );
-    Token token = Token.fromJson(json.decode(response.body));
+    print("USERIIIIIIIIIIIIIID: ${userID}");
     if (userID != 0) {
-      // await FlutterSession().set('token', username);
+      var session = FlutterSession();
+      session.set('token', username);
+      session.set('userID', userID);
     }
 
-    return token.token;
+    return userID.toString();
   }
 
 
