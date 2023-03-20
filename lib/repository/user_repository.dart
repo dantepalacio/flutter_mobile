@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 // import 'package:flutter_session/flutter_session.dart';
+import 'package:flutter_session/flutter_session.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:meta/meta.dart';
 import 'package:http/http.dart' as http;
@@ -137,13 +138,17 @@ class UserRepository implements IUserRepository {
     );
     Token token = Token.fromJson(json.decode(response.body));
     if (userID != 0) {
-      // await FlutterSession().set('token', username);
+      FlutterSession flutterSession = FlutterSession();
+      flutterSession.set('username', username);
+      print('sdkfgshdfghjsdfsdf');
+      flutterSession.set('userID', userID);
+
+      // print('FKJHAKJSFAISFJKASFASF $abc');
+      // print('IUAHSISAHSIASPODXKAS $pvv');
     }
 
     return token.token;
   }
-
-
 
   @override
   Future<void> update(User user) {

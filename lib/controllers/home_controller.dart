@@ -1,9 +1,12 @@
 import 'package:last/models/api_models.dart';
+import 'package:last/models/article_model.dart';
 import 'package:last/models/user_model.dart';
+import 'package:last/repository/article_repository.dart';
 import 'package:last/repository/user_repository.dart';
 
 class HomeController {
   UserRepository _userRepo = UserRepository();
+  ArticleRepository _articleRepo = ArticleRepository();
 
   // Future<List<User>> getAllUsers() {
   //   return _userRepo.getAll();
@@ -22,5 +25,7 @@ class HomeController {
     return _userRepo.delete(id);
   }
 
-
+  Future<List<Article>> fetchArticles() {
+    return _articleRepo.getAll();
+  }
 }

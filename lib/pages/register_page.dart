@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'HomePage.dart';
-import 'login.dart';
+import 'home_page.dart';
+import 'login_page.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'dart:convert';
 import 'package:last/repository/user_repository.dart';

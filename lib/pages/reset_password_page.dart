@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
-import 'login.dart';
-import 'HomePage.dart';
+import 'login_page.dart';
+import 'home_page.dart';
 
 class ResetPage extends StatefulWidget {
   @override

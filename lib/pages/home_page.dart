@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_session/flutter_session.dart';
+import 'package:last/pages/articles_page.dart';
 // import 'package:flutter_session/flutter_session.dart';
-import 'login.dart';
-import 'register.dart';
+import 'login_page.dart';
+import 'register_page.dart';
 
 import 'package:last/bloc/authentication_bloc.dart';
 import 'package:flutter/material.dart';
@@ -28,10 +30,22 @@ class _HomePageState extends State<HomePage> {
   final String sessionId;
   _HomePageState({required this.name, required this.sessionId});
 
+  @override
+  void initState() {
+    _fetchSession();
+  }
+
   int _currentIndex = 0;
+  String _username = "";
+  String _userID = "";
+
+  Future<void> _fetchSession() async {
+    _username = await FlutterSession().get('username');
+    _userID = await FlutterSession().get('userID').toString();
+  }
 
   void onTabTapped(int index) {
-    setState(() {
+    setState(() async {
       _currentIndex = index;
     });
   }
@@ -60,8 +74,7 @@ class _HomePageState extends State<HomePage> {
           // }),
           // ignore: avoid_unnecessary_containers
           Container(
-            child:
-                Text('Добро пожаловать ${widget.name}'), // ${widget.username}
+            child: Text('Добро пожаловать $_username'), // ${widget.username}
           ),
           Container(
             margin: const EdgeInsets.only(right: 20.0, left: 35.0, top: 20),
@@ -89,6 +102,21 @@ class _HomePageState extends State<HomePage> {
               },
               child: const Text(
                 'Регистрация',
+                style: TextStyle(color: Colors.white, fontSize: 18),
+              ),
+            ),
+          ),
+          Container(
+            height: 80,
+            width: 150,
+            margin: const EdgeInsets.only(left: 20.0, top: 20),
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (_) => ArticlesPage()));
+              },
+              child: const Text(
+                'Список статей',
                 style: TextStyle(color: Colors.white, fontSize: 18),
               ),
             ),
