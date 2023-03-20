@@ -9,7 +9,7 @@ final _base = "http://192.168.0.8:8000";
 final _getArticlesURL = "/api-arcticles/";
 final _signInURL = "/token/";
 final _signUpEndpoint = "/api/register/";
-final _sessionEndpoint = "/token/refresh/";
+final _sessionEndpoint = "main/api/token/refresh/";
 // final _graphParamEndpoint = "/api/get_states/";
 final _tokenURL = _base + _signInURL;
 final _signUpURL = _base + _signUpEndpoint;
@@ -55,6 +55,8 @@ Future<bool> registerApi(UserRegister userRegister) async {
 
 Future<int> loginApi(UserLogin userLogin) async {
   int userID = 0;
+  
+  // блок http-запроса
   final http.Response response = await http.post(
     Uri.parse(_tokenURL),
     headers: <String, String>{
@@ -62,14 +64,20 @@ Future<int> loginApi(UserLogin userLogin) async {
     },
     body: jsonEncode(userLogin.toDatabaseJson()),
   );
+  
+  
   if (response.statusCode == 200) {
     Token token = Token.fromJson(json.decode(response.body));
     Map<String, dynamic> userCreds = token.fetchUser(token.token);
 
     UserDao userDao = UserDao();
     userDao.addTokenToDb(token.token, token.refreshToken);
+    // print("INNNNNNNNNNNNN: ${userDao.getUserToken()}");
+    var users = await userDao.getUserToken();
+    // users.forEach((row) => {print(row)});
 
     userID = userCreds.values.last;
+    print("YYYYYYYYY: ${userID}");
     return userID;
   } else {
     throw Exception(json.decode(response.body));

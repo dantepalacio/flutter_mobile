@@ -97,7 +97,6 @@ class TokenDBProvider {
   }
 
   void initDBToken(Database database, int version) async {
-    print("VYZVALSYA");
     return await database.execute("CREATE TABLE $TokenTable ("
         "id INTEGER PRIMARY KEY AUTOINCREMENT, "
         "access TEXT,"
