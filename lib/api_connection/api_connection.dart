@@ -4,9 +4,11 @@ import 'package:http/http.dart' as http;
 import 'package:last/dao/dao.dart';
 import 'package:last/models/api_models.dart';
 import 'package:last/models/article_model.dart';
+import 'package:last/models/detail_article_model.dart';
 
 final _base = "http://192.168.0.8:8000";
 final _getArticlesURL = "/api-arcticles/";
+final _getDetailURL = '/api-detail/';
 final _signInURL = "/token/";
 final _signUpEndpoint = "/api/register/";
 final _sessionEndpoint = "main/api/token/refresh/";
@@ -55,7 +57,7 @@ Future<bool> registerApi(UserRegister userRegister) async {
 
 Future<int> loginApi(UserLogin userLogin) async {
   int userID = 0;
-  
+
   // блок http-запроса
   final http.Response response = await http.post(
     Uri.parse(_tokenURL),
@@ -64,8 +66,7 @@ Future<int> loginApi(UserLogin userLogin) async {
     },
     body: jsonEncode(userLogin.toDatabaseJson()),
   );
-  
-  
+
   if (response.statusCode == 200) {
     Token token = Token.fromJson(json.decode(response.body));
     Map<String, dynamic> userCreds = token.fetchUser(token.token);
@@ -84,26 +85,30 @@ Future<int> loginApi(UserLogin userLogin) async {
   }
 }
 
-Future<List<Article>> fetchArticles() async {
-  final http.Response response = await http
-      .get(Uri.parse(_base + _getArticlesURL), headers: <String, String>{
-    'Content-Type': 'application/json; charset=UTF-8',
-    'datatype': 'json',
-  });
-  if (response.statusCode == 200) {
-    List<dynamic> articlesJson = jsonDecode(response.body);
-    List<Article> articles = <Article>[];
-    articlesJson.forEach((element) {
-      articles.add(Article(
-          author: element['author'].toString(),
-          date: element['date'],
-          id: 1,
-          name: element['name'],
-          text: element['text']));
-    });
+class ArticleService {
+  Future<List<Article>> fetchArticles() async {
+    final response = await http.get(Uri.parse(_base + _getArticlesURL));
+    if (response.statusCode == 200) {
+      List<dynamic> body = json.decode(utf8.decode(response.bodyBytes));
+      print("EEEEEEEEEEE:     ${body}");
+      List<Article> articles =
+          body.map((dynamic item) => Article.fromJson(item)).toList();
+      return articles;
+    } else {
+      throw "Не удалось загрузить данные";
+    }
+  }
 
-    return articles;
-  } else {
-    throw Exception(json.decode(response.body));
+  Future<Article> fetchDetail(String articleID) async {
+    final response =
+        await http.get(Uri.parse(_base + _getDetailURL + articleID));
+    if (response.statusCode == 200) {
+      Map<dynamic, dynamic> body = json.decode(utf8.decode(response.bodyBytes));
+      print("DETAILLLLL:  ${body}");
+      Article detail = Article.fromJson(body);
+      return detail;
+    } else {
+      throw "Не удалось загрузить detail данные";
+    }
   }
 }

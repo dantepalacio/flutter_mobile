@@ -6,11 +6,6 @@ import 'package:last/repository/user_repository.dart';
 
 class HomeController {
   UserRepository _userRepo = UserRepository();
-  ArticleRepository _articleRepo = ArticleRepository();
-
-  // Future<List<User>> getAllUsers() {
-  //   return _userRepo.getAll();
-  // }
 
   Future<bool> registerUser(
       String email, String username, String password) async {
@@ -23,9 +18,5 @@ class HomeController {
 
   Future<void> removeBook(int id) {
     return _userRepo.delete(id);
-  }
-
-  Future<List<Article>> fetchArticles() {
-    return _articleRepo.getAll();
   }
 }

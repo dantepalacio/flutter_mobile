@@ -55,7 +55,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.amber,
-        title: const Text('Ануар ФОрум'),
+        title: const Text('Ануар Форум'),
         actions: <Widget>[
           TextButton(
               onPressed: () {
@@ -113,7 +113,7 @@ class _HomePageState extends State<HomePage> {
             child: ElevatedButton(
               onPressed: () {
                 Navigator.push(
-                    context, MaterialPageRoute(builder: (_) => ArticlesPage()));
+                    context, MaterialPageRoute(builder: (_) => ArticleList()));
               },
               child: const Text(
                 'Список статей',
