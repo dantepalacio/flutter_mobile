@@ -1,75 +1,89 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_session/flutter_session.dart';
-// import 'package:flutter_session/flutter_session.dart';
+import 'package:last/api_connection/api_connection.dart';
+import 'package:last/models/article_model.dart';
+import 'package:last/pages/articles_page.dart';
 import 'login_page.dart';
 import 'register_page.dart';
+import 'package:intl/intl.dart';
 
-import 'package:last/bloc/authentication_bloc.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:last/dao/dao.dart';
 
-class AddArticlePage extends StatefulWidget {
-  AddArticlePage({Key? key});
+class ArticleForm extends StatefulWidget {
+  const ArticleForm({Key? key}) : super(key: key);
 
   @override
-  Add_ArticlePageState createState() => Add_ArticlePageState();
+  _ArticleFormState createState() => _ArticleFormState();
 }
 
-class Add_ArticlePageState extends State<AddArticlePage> {
-  Add_ArticlePageState();
+class _ArticleFormState extends State<ArticleForm> {
+  late TextEditingController _nameController;
+  late TextEditingController _textController;
 
   @override
   void initState() {
-    _fetchSession();
+    super.initState();
+    _nameController = TextEditingController();
+    _textController = TextEditingController();
   }
 
-  int _currentIndex = 0;
-  String _username = "";
-  String _userID = "";
-
-  Future<void> _fetchSession() async {
-    _username = await FlutterSession().get('username');
-    _userID = await FlutterSession().get('userID').toString();
-  }
-
-  void onTabTapped(int index) {
-    setState(() async {
-      _currentIndex = index;
-    });
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _textController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.amber,
-        title: const Text('Добавление статьи'),
-        actions: <Widget>[
-          TextButton(
-              onPressed: () {
-                // BlocProvider.of<AuthenticationBloc>(context).add(LoggedOut());
-              },
-              child: const Text('Выйти'))
-        ],
+        title: const Text('Создание статьи'),
       ),
-      body: SingleChildScrollView(
-          child: Column(
-        children: <Widget>[
-          Container(
-            height: 80,
-            width: 150,
-            margin: const EdgeInsets.only(left: 20.0, top: 20),
-            child: ElevatedButton(
-              onPressed: () {},
-              child: const Text(
-                'Сохранить',
-                style: TextStyle(color: Colors.white, fontSize: 18),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: _nameController,
+              decoration: const InputDecoration(
+                labelText: 'Введите название статьи',
+                border: OutlineInputBorder(),
               ),
             ),
-          )
-        ],
-      )),
+            const SizedBox(height: 16.0),
+            TextField(
+              controller: _textController,
+              maxLines: null,
+              decoration: const InputDecoration(
+                labelText: 'Введите текст',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: () {
+                final article = ArticleCreate(
+                  name: _nameController.text,
+                  text: _textController.text,
+                  // date: formatted,
+                );
+                var access = UserPreferences.accessToken;
+                var refresh = UserPreferences.refreshToken;
+                print('ACCESS add_article_page $access');
+                print('REFRESH add_article_page $refresh');
+                var qwe = UserPreferences.userId;
+                print('SHARED IDDDD add_article_page $qwe');
+                createArticle(article);
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (_) => ArticleList()));
+              },
+              child: const Text('Опубликовать'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

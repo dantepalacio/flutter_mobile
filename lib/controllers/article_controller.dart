@@ -14,4 +14,8 @@ class ArticleController {
   Future<Article> fetchDetail(String articleID) {
     return _articleRepo.fetchDetail(articleID);
   }
+
+  Future<List<Article>> fetchComments(String articleID) {
+    return _articleRepo.fetchComments(articleID);
+  }
 }

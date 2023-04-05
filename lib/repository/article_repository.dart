@@ -15,4 +15,10 @@ class ArticleRepository implements IArticleRepository {
     var articles = _articleService.fetchDetail(articleID);
     return articles;
   }
+
+  @override
+  Future<List<Article>> fetchComments(String articleID) async {
+    var comments = _articleService.fetchComments(articleID);
+    return comments;
+  }
 }

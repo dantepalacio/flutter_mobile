@@ -1,4 +1,3 @@
-import 'package:flutter_session/flutter_session.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
 class UserLogin {

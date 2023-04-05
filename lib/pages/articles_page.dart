@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_session/flutter_session.dart';
 import 'package:last/controllers/article_controller.dart';
 import 'package:last/controllers/home_controller.dart';
 import 'package:last/models/article_model.dart';
 import 'package:last/pages/add_article_page.dart';
 import 'package:last/pages/detail_article.dart';
-// import 'package:flutter_session/flutter_session.dart';
 import '../api_connection/api_connection.dart';
 import 'login_page.dart';
 import 'register_page.dart';
