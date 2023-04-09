@@ -134,8 +134,11 @@ class _HomePageState extends State<HomePage> {
             margin: const EdgeInsets.only(left: 20.0, top: 20),
             child: ElevatedButton(
               onPressed: () {
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (_) => RegisterPage()));
+                UserPreferences.clearPreferences();
+                print('LSKFJKLJSXKLMFFFF $usernameTest');
+
+                //   Navigator.push(
+                //       context, MaterialPageRoute(builder: (_) => RegisterPage()));
               },
               child: const Text(
                 'Выйти',

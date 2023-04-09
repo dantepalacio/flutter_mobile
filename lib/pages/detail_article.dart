@@ -26,19 +26,45 @@ class DetailArticle extends StatefulWidget {
 
 class _DetailArticleState extends State<DetailArticle> {
   Article? _details;
-  Comments? _comments;
   final String articleID;
+  int _likes = 0;
+  TextEditingController CommentTextController = TextEditingController();
+
+  @override
+  void dispose() {
+    CommentTextController.dispose();
+    super.dispose();
+  }
+
+  void _submitComment() {
+    print('ARTCILE IDDDD $articleID');
+    createComment(articleID, CommentTextController.text);
+    CommentTextController.clear();
+  }
+
+  void _toggleLike() async {
+    await createLike(articleID);
+    getLikes().then((likes) {
+      setState(() {
+        _likes = likes.length;
+      });
+    });
+  }
 
   List<Widget> art = [];
-  List<Widget> artCom = [];
+  late List<Comments> artCom = [];
 
   _DetailArticleState({required this.articleID});
 
   @override
   void initState() {
     super.initState();
-    fetchComments(articleID);
     fetchDetails(articleID);
+    getLikes().then((likes) {
+      setState(() {
+        _likes = likes.length;
+      });
+    });
   }
 
   Future<List<Widget>> fetchDetails(String articleID) async {
@@ -57,53 +83,17 @@ class _DetailArticleState extends State<DetailArticle> {
           child: Text(detail.text),
         ),
       ];
-      // setState(() {
-      //   _details = detail;
-      // });
     });
-
-    print("FFFFFFF:    ${art}");
 
     return art;
   }
 
-  Future<List<Widget>> fetchComments(String articleID) async {
-    artCom = await widget._articleController
-        .fetchComments(articleID)
-        .then((comments) {
-      return <Widget>[
-        Container(
-          child: Text(comments.author),
-        ),
-        Container(
-          child: Text(comments.date),
-        ),
-        Container(
-          child: Text(comments.text),
-        ),
-      ];
-      // setState(() {
-      //   _details = detail;
-      // });
-    });
+  Future<List<Comments>> fetchComments(String articleID) async {
+    var artCom = await widget._articleController.fetchComments(articleID);
 
     print("COMMENTSSS DETAIL_ARTICLE:    ${artCom}");
-
     return artCom;
   }
-
-  // @override
-  // Widget build(BuildContext context) {
-  //   return MaterialApp(
-  //     home: Scaffold(
-  //       appBar: AppBar(
-  //         title: Text("Статья"),
-  //       ),
-  //       body: Container(
-  //         child: Column(children: fetchDetails(articleID)),
-  //       ),
-  //     ),
-  //   );
 
   @override
   Widget build(BuildContext context) {
@@ -116,26 +106,156 @@ class _DetailArticleState extends State<DetailArticle> {
           ),
           title: Text("Статья"),
         ),
-        body: FutureBuilder<List<Widget>>(
-          future: fetchDetails(articleID), 
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-            if (snapshot.hasData) {
-              return Container(
-                child: Column(
-                  children: snapshot.data!,
+        body: Column(
+          children: [
+            FutureBuilder<List<Widget>>(
+              future: fetchDetails(articleID),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                if (snapshot.hasData) {
+                  return Container(
+                    child: Column(
+                      children: snapshot.data!,
+                    ),
+                  );
+                } else {
+                  return Text("Error: ${snapshot.error}");
+                }
+              },
+            ),
+            Row(
+              children: [
+                IconButton(
+                  onPressed: () async {
+                    bool success = await createLike(articleID);
+                    if (success) {
+                      setState(() {
+                        _likes++;
+                      });
+                    }
+                  },
+                  icon: Icon(Icons.thumb_up),
                 ),
-              );
-            } else {
-              return Text("Error: ${snapshot.error}");
-            }
-          },
+                Text(_likes.toString()),
+              ],
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: CommentTextController,
+                    decoration: InputDecoration(
+                      hintText: "Введите комментарий",
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.send),
+                  onPressed: _submitComment,
+                ),
+              ],
+            ),
+            Flexible(
+              flex: 2,
+              child: FutureBuilder<List<Comments>>(
+                future: fetchComments(articleID),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                  if (snapshot.hasData) {
+                    return ListView.builder(
+                      itemCount: snapshot.data!.length,
+                      itemBuilder: (context, index) {
+                        return Card(
+                          child: ListTile(
+                            title: Text(snapshot.data![index].author),
+                            subtitle: Text(snapshot.data![index].text),
+                            onTap: () {},
+                          ),
+                        );
+                      },
+                    );
+                  } else {
+                    return Text("Error: ${snapshot.error}");
+                  }
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//         home: Scaffold(
+//       appBar: AppBar(
+//         leading: IconButton(
+//           icon: Icon(Icons.arrow_back),
+//           onPressed: () => Navigator.of(context).pop(),
+//         ),
+//         title: Text("Статья"),
+//       ),
+//       body: 
+//       Column(children: [
+//         FutureBuilder<List<Widget>>(
+//           future: fetchDetails(articleID),
+//           builder: (context, snapshot) {
+//             if (snapshot.connectionState == ConnectionState.waiting) {
+//               return Center(
+//                 child: CircularProgressIndicator(),
+//               );
+//             }
+//             if (snapshot.hasData) {
+//               return Container(
+//                 child: Column(
+//                   children: snapshot.data!,
+//                 ),
+//               );
+//             } else {
+//               return Text("Error: ${snapshot.error}");
+//             }
+//           },
+//         ),
+//         Flexible(
+//           flex: 2,
+//           child: FutureBuilder<List<Comments>>(
+//             future: fetchComments(articleID),
+//             builder: (context, snapshot) {
+//               if (snapshot.connectionState == ConnectionState.waiting) {
+//                 return Center(
+//                   child: CircularProgressIndicator(),
+//                 );
+//               }
+//               if (snapshot.hasData) {
+//                 return ListView.builder(
+//                   itemCount: snapshot.data!.length,
+//                   itemBuilder: (context, index) {
+//                     return Card(
+//                       child: ListTile(
+//                         title: Text(snapshot.data![index].author),
+//                         subtitle: Text(snapshot.data![index].text),
+//                         onTap: () {},
+//                       ),
+//                     );
+//                   },
+//                 );
+//               } else {
+//                 return Text("Error: ${snapshot.error}");
+//               }
+//             },
+//           ),
+//         )
+//       ]),
+//     ));
+//   }
+// }

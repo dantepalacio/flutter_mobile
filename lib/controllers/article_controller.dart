@@ -1,5 +1,6 @@
 import 'package:last/models/api_models.dart';
 import 'package:last/models/article_model.dart';
+import 'package:last/models/detail_article_model.dart';
 import 'package:last/models/user_model.dart';
 import 'package:last/repository/article_repository.dart';
 import 'package:last/repository/user_repository.dart';
@@ -15,7 +16,7 @@ class ArticleController {
     return _articleRepo.fetchDetail(articleID);
   }
 
-  Future<List<Article>> fetchComments(String articleID) {
+  Future<List<Comments>> fetchComments(String articleID) {
     return _articleRepo.fetchComments(articleID);
   }
 }

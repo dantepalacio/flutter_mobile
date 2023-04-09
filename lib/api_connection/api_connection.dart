@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:last/api_connection/token_refresher.dart';
 import 'package:last/dao/dao.dart';
 import 'package:last/models/api_models.dart';
@@ -16,7 +17,8 @@ final _base = "http://192.168.0.8:8000";
 final _getArticlesURL = "/api-arcticles/";
 final _getDetailURL = '/api-detail/';
 final _createArticle = '/api-create/';
-final _getCommentsURL = '/api-comments/';
+final _getCommentsURL = '/article_comments/';
+final _likeURL = '/api-like/';
 
 final _signInURL = "/token/";
 final _signUpEndpoint = "/api/register/";
@@ -58,8 +60,8 @@ Future<bool> registerApi(UserRegister userRegister) async {
   if (response.statusCode == 200) {
     success = Future.value(true);
   } else {
-    // print(json.decode(response.body).toString());
-    // throw Exception(json.decode(response.body));
+    print(json.decode(response.body).toString());
+    throw Exception(json.decode(response.body));
   }
 
   return success;
@@ -131,52 +133,22 @@ class ArticleService {
     }
   }
 
-  Future<List<Article>> fetchComments(String articleID) async {
+  Future<List<Comments>> fetchComments(String articleID) async {
     final response =
         await http.get(Uri.parse(_base + _getCommentsURL + articleID));
     if (response.statusCode == 200) {
       List<dynamic> body = json.decode(utf8.decode(response.bodyBytes));
-      print("COMMEEEEEEEEEEEnTS:  ${body}");
-      List<Article> comments =
-          body.map((dynamic item) => Article.fromJson(item)).toList();
+      print('COMMMMMMMMEEENTS API CONNECTOIN ${body}');
+      List<Comments> _comms =
+          body.map((dynamic item) => Comments.fromJson(item)).toList();
 
-      return comments;
+      // return comments;
+      return _comms;
     } else {
       throw "нк удалось загрузить комменты";
     }
   }
 }
-
-// Future<void> createArticle(ArticleCreate article) async {
-//   final Dio dio = Dio();
-//   final String token = UserPreferences.accessToken;
-
-//   final Map<String, String> headers = {
-//     'Content-Type': 'application/json',
-//     'Authorization': 'Bearer $token',
-//   };
-//   var asd = jsonEncode(article.toJson());
-//   var qwe = UserPreferences.userId;
-//   print('FFFFFFFFFFFFFFFFFFFFFFFASASASAS$asd');
-//   print('AAAAAAAAAAAAAAAAAAAAAAAAAAAQWWWWWWWW $qwe');
-
-//   // final http.Response response = await http.post(
-//   //   Uri.parse(_base + _createArticle),
-//   //   headers: headers,
-//   //   body: jsonEncode(article.toJson()),
-//   // );
-//   final url = _base + _createArticle;
-//   final response = await dio.post(url,
-//       data: jsonEncode(article.toJson()), options: Options(headers: headers));
-
-//   if (response.statusCode == 201) {
-//     print('Article created successfully.');
-//   }
-
-//   else {
-//     throw Exception('Failed to create article.');
-//   }
-// }
 
 Future<void> createArticle(ArticleCreate article) async {
   final dio = Dio();
@@ -208,5 +180,88 @@ Future<void> createArticle(ArticleCreate article) async {
     } else {
       throw Exception('Exception ошибка api_connection');
     }
+  }
+}
+
+Future<void> createComment(String articleId, String text) async {
+  // SharedPreferences prefs = await SharedPreferences.getInstance();
+  // int userId = prefs.getInt('userId');
+  Map<String, dynamic> userCreds =
+      JwtDecoder.decode(UserPreferences.accessToken);
+
+  var userId = userCreds.values.last;
+  print('IDDDDDDDDDDDDDDDDDDD $userId');
+
+  final response = await http.post(
+    Uri.parse(_base + '/create_comment/'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(<String, dynamic>{
+      'arcticle': articleId,
+      'author': userId,
+      'text': text,
+    }),
+  );
+
+  if (response.statusCode == 201) {
+    print('Комментарий создан');
+  } else {
+    print('Ошибка: ${response.statusCode}');
+  }
+}
+
+Future<bool> createLike(String articleId) async {
+  final dio = Dio();
+  final prefs = await SharedPreferences.getInstance();
+  dio.interceptors.add(TokenInterceptor(dio, prefs));
+  TokenInterceptor _tokenInterceptor = TokenInterceptor(dio, prefs);
+  final token = UserPreferences.accessToken;
+  final http.Response response = await http.post(
+    Uri.parse(_base + _likeURL),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+      'Authorization': 'Token $token',
+    },
+    body: jsonEncode({'article': articleId}),
+  );
+  if (response.statusCode == 201) {
+    return true;
+  }
+  if (response.statusCode == 401) {
+    print('LIKE 401');
+    _tokenInterceptor.refreshAccessToken(prefs);
+    createLike(articleId);
+    return false;
+  } else {
+    return false;
+  }
+}
+
+Future<List<Like>> getLikes() async {
+  final dio = Dio();
+  final prefs = await SharedPreferences.getInstance();
+  dio.interceptors.add(TokenInterceptor(dio, prefs));
+  TokenInterceptor _tokenInterceptor = TokenInterceptor(dio, prefs);
+  final token = _tokenInterceptor.getAccessToken();
+  final http.Response response = await http.get(
+    Uri.parse(_base + _likeURL),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+      // 'Authorization': 'Token $token',
+    },
+  );
+  if (response.statusCode == 200) {
+    List<dynamic> likesJson = jsonDecode(response.body);
+    print('LEIKSSES $likesJson');
+    return likesJson.map((likeJson) => Like.fromJson(likeJson)).toList();
+  }
+  if (response.statusCode == 401) {
+    print('LIKE 401');
+    _tokenInterceptor.refreshAccessToken(prefs);
+    await Future.delayed(const Duration(seconds: 1));
+    return getLikes();
+  } else {
+    throw Exception('Failed to load likes');
   }
 }

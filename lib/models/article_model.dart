@@ -45,3 +45,30 @@ class ArticleCreate {
       };
 
 }
+
+class Like {
+  final String id;
+  final String userId;
+  final String articleId;
+
+
+  Like({
+    required this.id,
+    required this.userId,
+    required this.articleId,
+  });
+
+  factory Like.fromJson(Map<String, dynamic> json) {
+    return Like(
+      id: json['id'],
+      userId: json['user'],
+      articleId: json['article'],
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'user': userId,
+        'article': articleId,
+      };
+}

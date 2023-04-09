@@ -1,5 +1,6 @@
 import 'package:last/api_connection/api_connection.dart';
 import 'package:last/models/article_model.dart';
+import 'package:last/models/detail_article_model.dart';
 import 'package:last/repository/article_interface.dart';
 
 class ArticleRepository implements IArticleRepository {
@@ -17,7 +18,7 @@ class ArticleRepository implements IArticleRepository {
   }
 
   @override
-  Future<List<Article>> fetchComments(String articleID) async {
+  Future<List<Comments>> fetchComments(String articleID) async {
     var comments = _articleService.fetchComments(articleID);
     return comments;
   }
