@@ -19,6 +19,8 @@ final _getDetailURL = '/api-detail/';
 final _createArticle = '/api-create/';
 final _getCommentsURL = '/article_comments/';
 final _likeURL = '/api-like/';
+final _setLikeURL = '/api-setLike/';
+final _deleteLikeURL = '/delete_like/';
 
 final _signInURL = "/token/";
 final _signUpEndpoint = "/api/register/";
@@ -184,12 +186,10 @@ Future<void> createArticle(ArticleCreate article) async {
 }
 
 Future<void> createComment(String articleId, String text) async {
-  // SharedPreferences prefs = await SharedPreferences.getInstance();
-  // int userId = prefs.getInt('userId');
   Map<String, dynamic> userCreds =
       JwtDecoder.decode(UserPreferences.accessToken);
-
   var userId = userCreds.values.last;
+
   print('IDDDDDDDDDDDDDDDDDDD $userId');
 
   final response = await http.post(
@@ -217,14 +217,20 @@ Future<bool> createLike(String articleId) async {
   dio.interceptors.add(TokenInterceptor(dio, prefs));
   TokenInterceptor _tokenInterceptor = TokenInterceptor(dio, prefs);
   final token = UserPreferences.accessToken;
+  Map<String, dynamic> userCreds =
+      JwtDecoder.decode(UserPreferences.accessToken);
+  var userIdd = userCreds.values.last;
+  print('ID LIKE  $articleId');
+  print('ID USER  $userIdd');
   final http.Response response = await http.post(
-    Uri.parse(_base + _likeURL),
+    Uri.parse(_base + _setLikeURL),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
       'Authorization': 'Token $token',
     },
-    body: jsonEncode({'article': articleId}),
+    body: jsonEncode({'user_id': userIdd, 'arcticle_id': articleId}),
   );
+
   if (response.statusCode == 201) {
     return true;
   }
@@ -238,7 +244,7 @@ Future<bool> createLike(String articleId) async {
   }
 }
 
-Future<List<Like>> getLikes() async {
+Future<List<Like>> getLikes(articleID) async {
   final dio = Dio();
   final prefs = await SharedPreferences.getInstance();
   dio.interceptors.add(TokenInterceptor(dio, prefs));
@@ -252,16 +258,85 @@ Future<List<Like>> getLikes() async {
     },
   );
   if (response.statusCode == 200) {
-    List<dynamic> likesJson = jsonDecode(response.body);
-    print('LEIKSSES $likesJson');
-    return likesJson.map((likeJson) => Like.fromJson(likeJson)).toList();
+    final List<dynamic> data = jsonDecode(response.body);
+    final List<Like> likes = [];
+    for (final likeData in data) {
+      final like = Like.fromJson(likeData);
+      if (like.articleId == articleID) {
+        // <<<<-- проверяем articleId
+        likes.add(like);
+      }
+      print('TESTTTTTTTTTTTTTTTTTTTTTTT $likes');
+    }
+    return likes;
+    // List<dynamic> likesJson = jsonDecode(response.body);
+    // print('LEIKSSES $likesJson');
+    // return likesJson.map((likeJson) => Like.fromJson(likeJson)).toList();
   }
   if (response.statusCode == 401) {
     print('LIKE 401');
     _tokenInterceptor.refreshAccessToken(prefs);
     await Future.delayed(const Duration(seconds: 1));
-    return getLikes();
+    return getLikes(articleID);
   } else {
     throw Exception('Failed to load likes');
+  }
+}
+
+Future<bool> deleteLike(String articleId) async {
+  final dio = Dio();
+  final prefs = await SharedPreferences.getInstance();
+  dio.interceptors.add(TokenInterceptor(dio, prefs));
+  TokenInterceptor _tokenInterceptor = TokenInterceptor(dio, prefs);
+  final token = UserPreferences.accessToken;
+  Map<String, dynamic> userCreds =
+      JwtDecoder.decode(UserPreferences.accessToken);
+  var userIdd = userCreds.values.last;
+  print('ID LIKE  $articleId');
+  print('ID USER  $userIdd');
+  final http.Response response = await http.delete(
+    Uri.parse(_base + _deleteLikeURL),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+      'Authorization': 'Token $token',
+    },
+    body: jsonEncode({'user_id': userIdd, 'arcticle_id': articleId}),
+  );
+
+  if (response.statusCode == 204) {
+    print('ЛАЙК УДАЛЕН');
+    return true;
+  }
+  if (response.statusCode == 401) {
+    print('LIKE DELETE 401');
+    _tokenInterceptor.refreshAccessToken(prefs);
+    deleteLike(articleId);
+    return false;
+  } else {
+    return false;
+  }
+}
+
+Future<bool> checkIfLiked(String articleId) async {
+  final dio = Dio();
+  final prefs = await SharedPreferences.getInstance();
+  dio.interceptors.add(TokenInterceptor(dio, prefs));
+  final token = UserPreferences.accessToken;
+  Map<String, dynamic> userCreds = JwtDecoder.decode(UserPreferences.accessToken);
+  var userIdd = userCreds.values.last;
+
+  final http.Response response = await http.get(
+    Uri.parse(_base + _likeURL + '?user_id=$userIdd&arcticle_id=$articleId'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+      'Authorization': 'Token $token',
+    },
+  );
+
+  if (response.statusCode == 200) {
+    final List<dynamic> likesJson = jsonDecode(response.body);
+    return likesJson.isNotEmpty;
+  } else {
+    return false;
   }
 }

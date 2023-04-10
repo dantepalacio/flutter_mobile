@@ -24,7 +24,6 @@ void main() async {
   final Dio dio = Dio();
   // TokenInterceptor _tokenInterceptor = TokenInterceptor(dio,prefs);
   dio.interceptors.add(TokenInterceptor(dio, prefs));
-
   runApp(MyApp());
 }
 

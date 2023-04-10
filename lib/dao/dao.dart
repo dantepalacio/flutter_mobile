@@ -108,28 +108,21 @@ class UserPreferences {
     _preferences = await SharedPreferences.getInstance();
   }
 
-  static const _keyAccessToken = 'access_token';
-  static const _keyRefreshToken = 'refresh_token';
-  static const _keyUserId = 'user_id';
-  static const _keyUsername = 'username';
-
   static String get accessToken =>
-      _preferences.getString(_keyAccessToken) ?? '';
+      _preferences.getString(_accessTokenKey) ?? '';
   static set accessToken(String value) =>
-      _preferences.setString(_keyAccessToken, value);
+      _preferences.setString(_accessTokenKey, value);
 
   static String get refreshToken =>
-      _preferences.getString(_keyRefreshToken) ?? '';
+      _preferences.getString(_refreshTokenKey) ?? '';
   static set refreshToken(String value) =>
-      _preferences.setString(_keyRefreshToken, value);
+      _preferences.setString(_refreshTokenKey, value);
 
-  // static int get userId => _preferences.getInt(_keyUserId) ?? 0;
-  // static set userId(int value) => _preferences.setInt(_keyUserId, value);
+  static int get userId => _preferences.getInt(_userIdKey) ?? -1;
+  static set userId(int value) => _preferences.setInt(_userIdKey, value);
 
-  static int get userId => _preferences.getInt(_keyUserId) ?? -1;
-  static set userId(int value) => _preferences.setInt(_keyUserId, value);
 
-  static String get username => _preferences.getString(_keyUsername) ?? '';
+  static String get username => _preferences.getString(_usernameKey) ?? '';
   static set username(String value) =>
-      _preferences.setString(_keyUsername, value);
+      _preferences.setString(_usernameKey, value);
 }

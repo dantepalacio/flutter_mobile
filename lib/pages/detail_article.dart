@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:last/controllers/article_controller.dart';
 import 'package:last/controllers/home_controller.dart';
+import 'package:last/dao/dao.dart';
 import 'package:last/models/article_model.dart';
 import 'package:last/models/detail_article_model.dart';
 import 'package:last/pages/add_article_page.dart';
@@ -29,6 +31,7 @@ class _DetailArticleState extends State<DetailArticle> {
   final String articleID;
   int _likes = 0;
   TextEditingController CommentTextController = TextEditingController();
+  bool _liked = false;
 
   @override
   void dispose() {
@@ -42,15 +45,6 @@ class _DetailArticleState extends State<DetailArticle> {
     CommentTextController.clear();
   }
 
-  void _toggleLike() async {
-    await createLike(articleID);
-    getLikes().then((likes) {
-      setState(() {
-        _likes = likes.length;
-      });
-    });
-  }
-
   List<Widget> art = [];
   late List<Comments> artCom = [];
 
@@ -60,12 +54,41 @@ class _DetailArticleState extends State<DetailArticle> {
   void initState() {
     super.initState();
     fetchDetails(articleID);
-    getLikes().then((likes) {
+    _checkIfLiked();
+    setState(() {
+      _likes = 0;
+    });
+    getLikes(articleID).then((likes) {
       setState(() {
         _likes = likes.length;
       });
+      print('QQQQQQQQQQQWQWQWQ $_likes');
     });
   }
+
+  void _checkIfLiked() async {
+    final liked = await checkIfLiked(articleID);
+    setState(() {
+      _liked = liked;
+    });
+  }
+
+  void _toggleLike() async {
+    final success = await createLike(articleID);
+    if (success) {
+      setState(() {
+        _liked = !_liked;
+      });
+    }
+  }
+
+  // void _toggleLike(String articleID) async {
+  //   await createLike(articleID.toString());
+  //   List<Like> likes = await getLikes(articleID);
+  //   setState(() {
+  //     _likes = likes.length;
+  //   });
+  // }
 
   Future<List<Widget>> fetchDetails(String articleID) async {
     art = await widget._articleController.fetchDetail(articleID).then((detail) {
@@ -131,14 +154,11 @@ class _DetailArticleState extends State<DetailArticle> {
               children: [
                 IconButton(
                   onPressed: () async {
-                    bool success = await createLike(articleID);
-                    if (success) {
-                      setState(() {
-                        _likes++;
-                      });
-                    }
+                    _toggleLike();
                   },
-                  icon: Icon(Icons.thumb_up),
+                  icon: _liked
+                      ? Icon(Icons.thumb_up_alt)
+                      : Icon(Icons.thumb_up_outlined),
                 ),
                 Text(_likes.toString()),
               ],
@@ -194,68 +214,3 @@ class _DetailArticleState extends State<DetailArticle> {
     );
   }
 }
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//         home: Scaffold(
-//       appBar: AppBar(
-//         leading: IconButton(
-//           icon: Icon(Icons.arrow_back),
-//           onPressed: () => Navigator.of(context).pop(),
-//         ),
-//         title: Text("Статья"),
-//       ),
-//       body: 
-//       Column(children: [
-//         FutureBuilder<List<Widget>>(
-//           future: fetchDetails(articleID),
-//           builder: (context, snapshot) {
-//             if (snapshot.connectionState == ConnectionState.waiting) {
-//               return Center(
-//                 child: CircularProgressIndicator(),
-//               );
-//             }
-//             if (snapshot.hasData) {
-//               return Container(
-//                 child: Column(
-//                   children: snapshot.data!,
-//                 ),
-//               );
-//             } else {
-//               return Text("Error: ${snapshot.error}");
-//             }
-//           },
-//         ),
-//         Flexible(
-//           flex: 2,
-//           child: FutureBuilder<List<Comments>>(
-//             future: fetchComments(articleID),
-//             builder: (context, snapshot) {
-//               if (snapshot.connectionState == ConnectionState.waiting) {
-//                 return Center(
-//                   child: CircularProgressIndicator(),
-//                 );
-//               }
-//               if (snapshot.hasData) {
-//                 return ListView.builder(
-//                   itemCount: snapshot.data!.length,
-//                   itemBuilder: (context, index) {
-//                     return Card(
-//                       child: ListTile(
-//                         title: Text(snapshot.data![index].author),
-//                         subtitle: Text(snapshot.data![index].text),
-//                         onTap: () {},
-//                       ),
-//                     );
-//                   },
-//                 );
-//               } else {
-//                 return Text("Error: ${snapshot.error}");
-//               }
-//             },
-//           ),
-//         )
-//       ]),
-//     ));
-//   }
-// }

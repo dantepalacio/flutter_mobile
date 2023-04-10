@@ -43,14 +43,12 @@ class ArticleCreate {
         'text': text,
         'author': UserPreferences.userId, //userCreds.values.last
       };
-
 }
 
 class Like {
   final String id;
   final String userId;
   final String articleId;
-
 
   Like({
     required this.id,
@@ -60,9 +58,9 @@ class Like {
 
   factory Like.fromJson(Map<String, dynamic> json) {
     return Like(
-      id: json['id'],
-      userId: json['user'],
-      articleId: json['article'],
+      id: json['id'].toString(),
+      userId: json['user'].toString(),
+      articleId: json['arcticle'].toString(),
     );
   }
 
