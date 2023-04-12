@@ -70,7 +70,7 @@ class _ArticleFormState extends State<ArticleForm> {
                   // date: formatted,
                 );
                 var access = UserPreferences.accessToken;
-                var refresh = UserPreferences.refreshToken;
+                var refresh = UserPreferences.refreshToken; //cxvxcv
                 print('ACCESS add_article_page $access');
                 print('REFRESH add_article_page $refresh');
                 var qwe = UserPreferences.userId;
