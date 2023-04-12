@@ -47,8 +47,10 @@ class TokenInterceptor extends Interceptor {
 
   bool isRefreshingToken = false;
   Future<String> getAccessToken() async {
-    String accessToken = prefs.getString('access_token');
+    // String accessToken = prefs.getString('access_token');
+    String accessToken = UserPreferences.accessToken;
     print('ASASASASASA $accessToken');
+    
     if (accessToken != null) {
       Map<String, dynamic> payload = json.decode(ascii
           .decode(base64.decode(base64.normalize(accessToken.split(".")[1]))));
@@ -61,7 +63,7 @@ class TokenInterceptor extends Interceptor {
           await refreshAccessToken(prefs);
           isRefreshingToken = false; // сбрасываем флаг
         }
-        accessToken = prefs.getString('access_token');
+        accessToken = UserPreferences.accessToken;
       }
       return accessToken;
     } else {
@@ -69,26 +71,9 @@ class TokenInterceptor extends Interceptor {
     }
   }
 
-  // Future<void> refreshAccessToken() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   String refreshToken = prefs.getString('refresh_token');
-  //   print('REFRESH TOKEN_REFRESHER $refreshToken');
-  //   var response = await dio.post(
-  //     'http://192.168.0.8:8000/token/refresh/',
-  //     options: Options(contentType: 'application/json; charset=UTF-8'),
-  //     data: {'refresh': refreshToken},
-  //   );
-  //   if (response.statusCode == 200) {
-  //     Map<String, dynamic> data = response.data;
-  //     print('DATA ACESSSSSS $data');
-  //     await prefs.setString('access_token', data['access_token']);
-  //   } else {
-  //     throw Exception('Ощибка в загрузке рефреш токена');
-  //   }
-  // }
   Future<void> refreshAccessToken(SharedPreferences prefs) async {
-    String refreshToken = prefs.getString('refresh_token');
-    print('REFRESH TOKEN_REFRESHER $refreshToken');
+    // String refreshToken = prefs.getString('refresh_token');
+    String refreshToken = UserPreferences.refreshToken;
     var response = await dio.post(
       'http://192.168.0.8:8000/token/refresh/',
       options: Options(contentType: 'application/json; charset=UTF-8'),
@@ -96,8 +81,9 @@ class TokenInterceptor extends Interceptor {
     );
     if (response.statusCode == 200) {
       Map<String, dynamic> data = response.data;
-      print('DATA ACESSSSSS $data');
-      await prefs.setString('access_token', data['access']);
+      print('UPDATE ACCESS 401 401 401');
+      // await prefs.setString('access_token', data['access']);
+      await UserPreferences.setAccessToken(data['access']);
     } else {
       throw Exception('Ощибка в загрузке рефреш токена');
     }

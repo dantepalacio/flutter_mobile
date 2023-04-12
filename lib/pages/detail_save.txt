@@ -129,28 +129,26 @@ class _DetailArticleState extends State<DetailArticle> {
         ),
         body: Column(
           children: [
-            Expanded(
-              child: FutureBuilder<List<Widget>>(
-                future: fetchDetails(articleID),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  }
-                  if (snapshot.hasData) {
-                    return SingleChildScrollView(
-                      child: Container(
-                        child: Column(
-                          children: snapshot.data!,
-                        ),
+            FutureBuilder<List<Widget>>(
+              future: fetchDetails(articleID),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                if (snapshot.hasData) {
+                  return SingleChildScrollView(
+                    child: Container(
+                      child: Column(
+                        children: snapshot.data!,
                       ),
-                    );
-                  } else {
-                    return Text("Error: ${snapshot.error}");
-                  }
-                },
-              ),
+                    ),
+                  );
+                } else {
+                  return Text("Error: ${snapshot.error}");
+                }
+              },
             ),
             Row(
               children: [
@@ -181,7 +179,8 @@ class _DetailArticleState extends State<DetailArticle> {
                 ),
               ],
             ),
-            Expanded(
+            Flexible(
+              flex: 2,
               child: FutureBuilder<List<Comments>>(
                 future: fetchComments(articleID),
                 builder: (context, snapshot) {

@@ -4,6 +4,7 @@ import 'package:last/pages/articles_page.dart';
 // import 'package:flutter_session/flutter_session.dart';
 import 'login_page.dart';
 import 'register_page.dart';
+import 'create_profile_page.dart';
 
 import 'package:last/bloc/authentication_bloc.dart';
 import 'package:flutter/material.dart';
@@ -134,11 +135,11 @@ class _HomePageState extends State<HomePage> {
             margin: const EdgeInsets.only(left: 20.0, top: 20),
             child: ElevatedButton(
               onPressed: () {
-                UserPreferences.clearPreferences();
-                print('LSKFJKLJSXKLMFFFF $usernameTest');
+                // UserPreferences.clearPreferences();
+                // print('LSKFJKLJSXKLMFFFF $usernameTest');
 
-                //   Navigator.push(
-                //       context, MaterialPageRoute(builder: (_) => RegisterPage()));
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => CreateProfilePage()));
               },
               child: const Text(
                 'Выйти',

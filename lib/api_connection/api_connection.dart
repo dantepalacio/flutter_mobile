@@ -8,6 +8,7 @@ import 'package:last/dao/dao.dart';
 import 'package:last/models/api_models.dart';
 import 'package:last/models/article_model.dart';
 import 'package:last/models/detail_article_model.dart';
+import 'package:last/models/profile_model.dart';
 import 'package:last/pages/articles_page.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -127,7 +128,6 @@ class ArticleService {
         await http.get(Uri.parse(_base + _getDetailURL + articleID));
     if (response.statusCode == 200) {
       Map<dynamic, dynamic> body = json.decode(utf8.decode(response.bodyBytes));
-      print("DETAILLLLL:  ${body}");
       Article detail = Article.fromJson(body);
       return detail;
     } else {
@@ -140,7 +140,6 @@ class ArticleService {
         await http.get(Uri.parse(_base + _getCommentsURL + articleID));
     if (response.statusCode == 200) {
       List<dynamic> body = json.decode(utf8.decode(response.bodyBytes));
-      print('COMMMMMMMMEEENTS API CONNECTOIN ${body}');
       List<Comments> _comms =
           body.map((dynamic item) => Comments.fromJson(item)).toList();
 
@@ -220,8 +219,6 @@ Future<bool> createLike(String articleId) async {
   Map<String, dynamic> userCreds =
       JwtDecoder.decode(UserPreferences.accessToken);
   var userIdd = userCreds.values.last;
-  print('ID LIKE  $articleId');
-  print('ID USER  $userIdd');
   final http.Response response = await http.post(
     Uri.parse(_base + _setLikeURL),
     headers: <String, String>{
@@ -244,42 +241,34 @@ Future<bool> createLike(String articleId) async {
   }
 }
 
-Future<List<Like>> getLikes(articleID) async {
+Future<List<Like>> getLikes(articleId) async {
   final dio = Dio();
   final prefs = await SharedPreferences.getInstance();
   dio.interceptors.add(TokenInterceptor(dio, prefs));
   TokenInterceptor _tokenInterceptor = TokenInterceptor(dio, prefs);
-  final token = _tokenInterceptor.getAccessToken();
+  final token = UserPreferences.accessToken;
+  Map<String, dynamic> userCreds =
+      JwtDecoder.decode(UserPreferences.accessToken);
+  var userIdd = userCreds.values.last;
+
   final http.Response response = await http.get(
-    Uri.parse(_base + _likeURL),
+    Uri.parse(_base + _likeURL + '?arcticle=$articleId'),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
-      // 'Authorization': 'Token $token',
+      'Authorization': 'Token $token',
     },
   );
   if (response.statusCode == 200) {
-    final List<dynamic> data = jsonDecode(response.body);
-    final List<Like> likes = [];
-    for (final likeData in data) {
-      final like = Like.fromJson(likeData);
-      if (like.articleId == articleID) {
-        // <<<<-- проверяем articleId
-        likes.add(like);
-      }
-      print('TESTTTTTTTTTTTTTTTTTTTTTTT $likes');
-    }
-    return likes;
-    // List<dynamic> likesJson = jsonDecode(response.body);
-    // print('LEIKSSES $likesJson');
-    // return likesJson.map((likeJson) => Like.fromJson(likeJson)).toList();
-  }
-  if (response.statusCode == 401) {
-    print('LIKE 401');
-    _tokenInterceptor.refreshAccessToken(prefs);
-    await Future.delayed(const Duration(seconds: 1));
-    return getLikes(articleID);
+    final jsonResponse = jsonDecode(response.body);
+    final likesList =
+        (jsonResponse as List).map((data) => Like.fromJson(data)).toList();
+
+    // SHARED PREF LIKES
+    UserPreferences.likesCount = likesList.length;
+    print('ASASSSSSSSSS $likesList');
+    return likesList;
   } else {
-    throw Exception('Failed to load likes');
+    throw Exception('ОШибка при загрузке лайков');
   }
 }
 
@@ -292,15 +281,14 @@ Future<bool> deleteLike(String articleId) async {
   Map<String, dynamic> userCreds =
       JwtDecoder.decode(UserPreferences.accessToken);
   var userIdd = userCreds.values.last;
-  print('ID LIKE  $articleId');
-  print('ID USER  $userIdd');
+
   final http.Response response = await http.delete(
-    Uri.parse(_base + _deleteLikeURL),
+    Uri.parse(_base + _deleteLikeURL + articleId + '/'),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
       'Authorization': 'Token $token',
     },
-    body: jsonEncode({'user_id': userIdd, 'arcticle_id': articleId}),
+    body: jsonEncode({'user_id': userIdd, 'pk': articleId}),
   );
 
   if (response.statusCode == 204) {
@@ -322,11 +310,12 @@ Future<bool> checkIfLiked(String articleId) async {
   final prefs = await SharedPreferences.getInstance();
   dio.interceptors.add(TokenInterceptor(dio, prefs));
   final token = UserPreferences.accessToken;
-  Map<String, dynamic> userCreds = JwtDecoder.decode(UserPreferences.accessToken);
+  Map<String, dynamic> userCreds =
+      JwtDecoder.decode(UserPreferences.accessToken);
   var userIdd = userCreds.values.last;
 
   final http.Response response = await http.get(
-    Uri.parse(_base + _likeURL + '?user_id=$userIdd&arcticle_id=$articleId'),
+    Uri.parse(_base + _likeURL + '?user=$userIdd&arcticle=$articleId'),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
       'Authorization': 'Token $token',
@@ -334,9 +323,65 @@ Future<bool> checkIfLiked(String articleId) async {
   );
 
   if (response.statusCode == 200) {
-    final List<dynamic> likesJson = jsonDecode(response.body);
-    return likesJson.isNotEmpty;
+    final List<dynamic> likes = jsonDecode(response.body);
+    return likes.isNotEmpty;
   } else {
-    return false;
+    throw Exception('Failed to load likes');
+  }
+}
+
+// Создание профиля
+Future<Profile> createProfile(Map<String, dynamic> profileData) async {
+  late final Dio dio;
+  late final SharedPreferences prefs;
+  dio = Dio();
+  prefs = await SharedPreferences.getInstance();
+  TokenInterceptor _refresher = TokenInterceptor(dio, prefs);
+  // final token = _refresher.getAccessToken();
+  final token = UserPreferences.accessToken;
+  print(jsonEncode(profileData));
+  final response = await http.post(
+    Uri.parse(_base + '/profiles/create/'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+    body: jsonEncode(profileData),
+  );
+  if (response.statusCode == 201) {
+    final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+    return Profile.fromJson(jsonResponse);
+  } else if (response.statusCode == 401) {
+    _refresher.refreshAccessToken(prefs);
+    return createProfile(profileData);
+  } else {
+    throw Exception('Failed to create profile');
+  }
+}
+
+// Получение профиля по ID
+Future<Profile> fetchProfile(String id) async {
+  final response = await http.get(Uri.parse(_base + '/profiles/$id/'));
+  if (response.statusCode == 200) {
+    final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+    return Profile.fromJson(jsonResponse);
+  } else {
+    throw Exception('Failed to load profile');
+  }
+}
+
+// Обновление профиля
+Future<Profile> updateProfile(
+    String id, Map<String, dynamic> profileData) async {
+  final response = await http.put(
+    Uri.parse(_base + 'edit/$id/'),
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode(profileData),
+  );
+  if (response.statusCode == 200) {
+    final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+    return Profile.fromJson(jsonResponse);
+  } else {
+    throw Exception('Failed to update profile');
   }
 }

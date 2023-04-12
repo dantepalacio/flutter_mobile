@@ -90,6 +90,7 @@ class UserPreferences {
   static const String _refreshTokenKey = 'refresh_token';
   static const String _userIdKey = 'user_id';
   static const String _usernameKey = 'username';
+  static const String _likesCountKey = 'likes_count';
 
   static Future<void> setAccessToken(String accessToken) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -125,4 +126,8 @@ class UserPreferences {
   static String get username => _preferences.getString(_usernameKey) ?? '';
   static set username(String value) =>
       _preferences.setString(_usernameKey, value);
+
+  static int get likesCount => _preferences.getInt(_likesCountKey) ?? 0;
+  static set likesCount(int value) => _preferences.setInt(_likesCountKey, value);
+
 }
