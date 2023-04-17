@@ -130,15 +130,7 @@ class UserRepository implements IUserRepository {
     UserLogin userLogin = UserLogin(username: username, password: password);
     int userID = await loginApi(userLogin);
     print("USERIIIIIIIIIIIIIID: ${userID}");
-    if (userID != 0) {
-      FlutterSession flutterSession = FlutterSession();
-      flutterSession.set('username', username);
-      print('sdkfgshdfghjsdfsdf');
-      flutterSession.set('userID', userID);
 
-      // print('FKJHAKJSFAISFJKASFASF $abc');
-      // print('IUAHSISAHSIASPODXKAS $pvv');
-    }
 
     return userID.toString();
   }

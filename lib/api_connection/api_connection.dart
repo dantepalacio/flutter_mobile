@@ -90,8 +90,15 @@ Future<int> loginApi(UserLogin userLogin) async {
     final accessToken = data['access'];
     final refreshToken = data['refresh'];
 
+    UserPreferences.username = userLogin.username;
+
+    print(
+        'AOHSAIUHDSIUADHIUAUHSAHISUAHSAISAHAIUSIAHSAAS ${UserPreferences.username}');
+
     UserPreferences.accessToken = accessToken;
+
     UserPreferences.refreshToken = refreshToken;
+
     // final rfr = UserPreferences.refreshToken;
     // final acs = UserPreferences.accessToken;
 
@@ -102,6 +109,7 @@ Future<int> loginApi(UserLogin userLogin) async {
     // users.forEach((row) => {print(row)});
 
     userID = userCreds.values.last;
+    UserPreferences.userId = userID;
     print("YYYYYYYYY: ${userID}");
     return userID;
   } else {
@@ -187,6 +195,9 @@ Future<void> createArticle(ArticleCreate article) async {
 Future<void> createComment(String articleId, String text) async {
   Map<String, dynamic> userCreds =
       JwtDecoder.decode(UserPreferences.accessToken);
+
+  var sad = UserPreferences.userId;
+  print("AAAAAAAAAAAAAAAAA:        ${sad}");
   var userId = userCreds.values.last;
 
   print('IDDDDDDDDDDDDDDDDDDD $userId');
@@ -359,9 +370,20 @@ Future<Profile> createProfile(Map<String, dynamic> profileData) async {
   }
 }
 
+// final response = await http.get(Uri.parse(_base + '/profiles/$userid/'));
 // Получение профиля по ID
-Future<Profile> fetchProfile(String id) async {
-  final response = await http.get(Uri.parse(_base + '/profiles/$id/'));
+// Future<Profile> fetchProfile(String userid) async {
+//   final response = await http.get(Uri.parse(_base + '/profiles/$userid/'));
+//   if (response.statusCode == 200) {
+//     final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+//     return Profile.fromJson(jsonResponse);
+//   } else {
+//     throw Exception('Failed to load profile');
+//   }
+// }
+Future<Profile> fetchProfile(String userId) async {
+  var userID = UserPreferences.userId;
+  final response = await http.get(Uri.parse(_base + '/profiles/$userID/'));
   if (response.statusCode == 200) {
     final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
     return Profile.fromJson(jsonResponse);

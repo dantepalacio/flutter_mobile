@@ -1,12 +1,15 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
+import 'package:last/api_connection/push_service.dart';
 import 'package:last/api_connection/token_refresher.dart';
 import 'package:last/controllers/home_controller.dart';
 import 'package:last/dao/dao.dart';
 import 'package:last/models/api_models.dart';
 import 'package:last/pages/register_page.dart';
 import 'package:last/pages/reset_password_page.dart';
+import 'package:last/services/notification_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'home_page.dart';
 import 'package:form_field_validator/form_field_validator.dart';
@@ -15,7 +18,11 @@ import 'dart:convert';
 import 'package:last/api_connection/api_connection.dart';
 import 'package:last/repository/user_repository.dart';
 
+// final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+//     FlutterLocalNotificationsPlugin();
+
 // dio.interceptors.add(TokenInterceptor(dio, prefs));
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await UserPreferences.init();
@@ -24,6 +31,8 @@ void main() async {
   // TokenInterceptor _tokenInterceptor = TokenInterceptor(dio,prefs);
   dio.interceptors.add(TokenInterceptor(dio, prefs));
   runApp(MyApp());
+
+  PushService().connect();
 }
 
 class UserData {
@@ -69,6 +78,12 @@ class LoginDemo extends StatefulWidget {
 class _LoginDemoState extends State<LoginDemo> {
   TextEditingController usernameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    // NotificationService.initialize(flutterLocalNotificationsPlugin);
+  }
 
   @override
   void dispose() {
@@ -150,12 +165,17 @@ class _LoginDemoState extends State<LoginDemo> {
             ),
             TextButton(
               onPressed: () {
-                UserRepository userRepository = UserRepository();
-                userRepository.signInWithCredentials(
-                    username: usernameController.text,
-                    password: passwordController.text);
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (_) => ResetPage()));
+                // UserRepository userRepository = UserRepository();
+                // userRepository.signInWithCredentials(
+                //     username: usernameController.text,
+                //     password: passwordController.text);
+                // Navigator.push(
+                //     context, MaterialPageRoute(builder: (_) => ResetPage()));
+
+                // NotificationService.showBigTextNotification(
+                //     title: "AZAZA",
+                //     body: "AZAZAZAZAAZA",
+                //     fln: flutterLocalNotificationsPlugin);
               },
               child: const Text(
                 'Забыли пароль?',

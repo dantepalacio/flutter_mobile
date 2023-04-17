@@ -50,6 +50,8 @@ dependencies:
   flutter_session: any
   dio: ^5.1.1
   image_picker: ^0.8.0+4
+  flutter_local_notifications: any
+  web_socket_channel: any
 
 
 

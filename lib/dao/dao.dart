@@ -122,12 +122,11 @@ class UserPreferences {
   static int get userId => _preferences.getInt(_userIdKey) ?? -1;
   static set userId(int value) => _preferences.setInt(_userIdKey, value);
 
-
   static String get username => _preferences.getString(_usernameKey) ?? '';
   static set username(String value) =>
       _preferences.setString(_usernameKey, value);
 
   static int get likesCount => _preferences.getInt(_likesCountKey) ?? 0;
-  static set likesCount(int value) => _preferences.setInt(_likesCountKey, value);
-
+  static set likesCount(int value) =>
+      _preferences.setInt(_likesCountKey, value);
 }

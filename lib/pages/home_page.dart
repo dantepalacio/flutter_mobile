@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:last/pages/add_article_page.dart';
 import 'package:last/pages/articles_page.dart';
+import 'package:last/pages/show_profile_page.dart';
 // import 'package:flutter_session/flutter_session.dart';
 import 'login_page.dart';
 import 'register_page.dart';
@@ -36,6 +38,7 @@ class _HomePageState extends State<HomePage> {
   String _username = "";
   String _userID = "";
   final usernameTest = UserPreferences.username;
+  final userID = UserPreferences.userId;
 
   void onTabTapped(int index) {
     setState(() async {
@@ -136,13 +139,36 @@ class _HomePageState extends State<HomePage> {
             child: ElevatedButton(
               onPressed: () {
                 // UserPreferences.clearPreferences();
-                // print('LSKFJKLJSXKLMFFFF $usernameTest');
+                print('LSKFJKLJSXKLMFFFF $usernameTest');
 
                 Navigator.push(context,
                     MaterialPageRoute(builder: (_) => CreateProfilePage()));
               },
               child: const Text(
-                'Выйти',
+                'Создать профиль',
+                style: TextStyle(color: Colors.white, fontSize: 18),
+              ),
+            ),
+          ),
+          Container(
+            height: 80,
+            width: 150,
+            margin: const EdgeInsets.only(left: 20.0, top: 20),
+            child: ElevatedButton(
+              onPressed: () {
+                var decodedToken =
+                    JwtDecoder.decode(UserPreferences.accessToken);
+
+                var userIDD = decodedToken.values.last;
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => ProfilePage(
+                              userId: userIDD.toString(),
+                            )));
+              },
+              child: const Text(
+                'Профиль',
                 style: TextStyle(color: Colors.white, fontSize: 18),
               ),
             ),
